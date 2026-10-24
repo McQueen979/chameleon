@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'none'; connect-src 'none'; form-action 'none'"
+    />
+    <title>Chameleon 设置</title>
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body>
+    <!-- 独立设置窗口：普通窗口，有底色有边框。主窗口那边一个按钮都不加 -->
+    <header class="head">
+      <h1 class="head__title">Chameleon</h1>
+      <span class="head__label">设置</span>
+    </header>
+
+    <main class="body">
+      <section class="section">
+        <h2 class="label">不透明度</h2>
+        <div class="row">
+          <input class="range" id="opacity" type="range" min="0.15" max="1" step="0.05" aria-label="不透明度" />
+          <output class="value" id="opacityValue"></output>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="label">静止显现门槛</h2>
+        <div class="row">
+          <input class="range" id="still" type="range" min="250" max="2000" step="50" aria-label="静止显现门槛" />
+          <output class="value" id="stillValue"></output>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="label">顶栏按钮</h2>
+        <ul class="tools" id="tools"></ul>
+      </section>
+
+      <section class="section">
+        <h2 class="label">文字灰度（0 黑 — 255 白）</h2>
+        <div class="ink" id="ink"></div>
+        <div class="preview" id="preview">
+          <div class="pv pv--dark">
+            <span class="pv__title">标题 Title</span>
+            <span class="pv__body">正文文字示例 Text sample</span>
+          </div>
+          <div class="pv pv--light">
+            <span class="pv__title">标题 Title</span>
+            <span class="pv__body">正文文字示例 Text sample</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <button class="act" id="btnConfig" type="button">配置文件</button>
+      <span class="foot__gap"></span>
+      <button class="act" id="btnReset" type="button">恢复默认</button>
+      <button class="act act--strong" id="btnClose" type="button">关闭</button>
+    </footer>
+
+    <script src="settings.js"></script>
+  </body>
+</html>

@@ -1,0 +1,644 @@
+/* ==========================================================================
+   Chameleon · Editorial（编辑杂志风）
+   窗口完全透明：没有任何底色，只有文字浮在下层画面之上。
+   文字只有颜色，不带描边 / 光晕 / 阴影——白字外边那圈黑影已按要求拿掉。
+   禁止：彩色强调色 / 阴影 / 大圆角 / 渐变 / 粗边框 / 无衬线标题
+   ========================================================================== */
+
+:root {
+  --zoom: 1;
+  --text: #f4f4f4;
+  --fg: var(--text);
+  --fg-80: color-mix(in srgb, var(--text) 86%, transparent);
+  --fg-60: color-mix(in srgb, var(--text) 62%, transparent);
+  --fg-40: color-mix(in srgb, var(--text) 42%, transparent);
+  --fg-20: color-mix(in srgb, var(--text) 24%, transparent);
+  --fg-10: color-mix(in srgb, var(--text) 16%, transparent);
+  --tint-strong: color-mix(in srgb, var(--text) 12%, transparent);
+  --line: color-mix(in srgb, var(--text) 22%, transparent);
+
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Songti SC", "Source Han Serif SC",
+    "Noto Serif CJK SC", SimSun, serif;
+  --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Helvetica Neue", Arial, sans-serif;
+  --mono: "Cascadia Code", Consolas, "SF Mono", "Menlo", monospace;
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: transparent;
+}
+
+body {
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.6;
+  overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+.frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: transparent;
+  overflow: hidden;
+}
+
+/* ------------------------------------------------------------------ 顶栏 */
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  flex-wrap: wrap; /* 窗口很窄时折行，保证按钮不会被裁掉点不到 */
+  min-height: 30px;
+  padding: 2px 6px;
+}
+
+.bar__drag {
+  display: flex;
+  align-items: center;
+  flex: 1 1 60px;
+  min-width: 0;
+  -webkit-app-region: drag;
+}
+
+/* 顶栏左侧按钮区（≡ 文件列表）与右侧按钮区都由 config.tools 渲染 */
+.bar__left {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.bar__tools {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+  -webkit-app-region: no-drag;
+}
+
+.meta {
+  display: block;
+  overflow: hidden;
+  font-family: var(--serif);
+  font-size: 11px;
+  font-style: italic;
+  color: var(--fg-60);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.meta[data-mode="transient"] {
+  font-style: normal;
+  color: var(--fg-40);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------------ 按钮 */
+
+.btn {
+  position: relative;
+  padding: 5px 7px;
+  border: 0;
+  background: transparent;
+  color: var(--fg-60);
+  font-family: var(--sans);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  -webkit-app-region: no-drag;
+}
+
+.btn::after {
+  content: "";
+  position: absolute;
+  right: 8px;
+  bottom: 5px;
+  left: 8px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.3s var(--ease);
+}
+
+.btn:hover {
+  color: var(--fg);
+}
+
+.btn:hover::after {
+  transform: scaleX(1);
+}
+
+.btn:active {
+  transform: scale(0.95);
+}
+
+.btn:focus-visible {
+  outline: none;
+  color: var(--fg);
+}
+
+/* 顶栏按钮：全部是符号，不靠文字说明，靠位置记住 */
+.btn--icon {
+  padding: 5px 7px;
+  font-size: 11px;
+  letter-spacing: 0;
+  line-height: 1;
+  text-transform: none;
+}
+
+.btn--icon::after {
+  display: none;
+}
+
+.btn.is-on {
+  color: var(--text);
+}
+
+.btn--ghost {
+  padding: 8px 18px;
+  border: 1px solid var(--fg-20);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--fg-60);
+}
+
+.btn--ghost:hover {
+  border-color: var(--fg);
+  color: var(--fg);
+}
+
+/* ------------------------------------------------------------ 主体布局 */
+
+.input {
+  width: 100%;
+  padding: 10px 14px 6px;
+  border: 0;
+  background: transparent;
+  color: var(--fg);
+  font-family: var(--sans);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.input:focus {
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--fg-40);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------- 目录 */
+
+.notes {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 2px 0 32px;
+  overflow-y: auto;
+}
+
+.note {
+  display: block;
+  width: 100%;
+  padding: 7px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--fg-80);
+  font-family: var(--serif);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.5s ease, font-style 0.5s ease;
+}
+
+.note:hover {
+  color: var(--fg);
+  font-style: italic;
+}
+
+.note.is-active {
+  color: var(--fg);
+  font-style: italic;
+}
+
+.note:focus-visible {
+  outline: none;
+  color: var(--fg);
+}
+
+/* ---------------------------------------------------------------- 正文 */
+
+.doc {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.doc[hidden] {
+  display: none;
+}
+
+.md {
+  max-width: 74ch;
+  margin: 0 auto;
+  /* 左右内边距跟着窗口宽度缩，最小窗口下别把正文挤没了 */
+  padding: 26px clamp(12px, 6%, 32px) 90px;
+  font-size: calc(13px * var(--zoom));
+  user-select: text;
+}
+
+.md[hidden] {
+  display: none;
+}
+
+.md > *:first-child {
+  margin-top: 0;
+}
+
+.md h1,
+.md h2,
+.md h3,
+.md h4,
+.md h5,
+.md h6 {
+  font-family: var(--serif);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+
+.md h1 {
+  margin: 0 0 1.5rem;
+  font-size: 1.95em;
+  line-height: 1.1;
+}
+
+.md h2 {
+  margin: 2.9rem 0 0.9rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--fg-10);
+  font-size: 1.38em;
+  line-height: 1.25;
+}
+
+.md h3 {
+  margin: 2.2rem 0 0.7rem;
+  font-size: 1.14em;
+}
+
+.md h4,
+.md h5,
+.md h6 {
+  margin: 1.8rem 0 0.5rem;
+  font-size: 1em;
+  font-style: italic;
+  color: var(--fg-60);
+}
+
+.md p {
+  margin: 0 0 1.15rem;
+  color: var(--fg-80);
+  line-height: 1.75;
+}
+
+.md strong {
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.md em {
+  font-style: italic;
+}
+
+.md a {
+  color: var(--fg);
+  text-decoration: underline;
+  text-decoration-color: var(--fg-40);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s ease;
+}
+
+.md a:hover {
+  text-decoration-color: var(--fg);
+}
+
+.md ul,
+.md ol {
+  margin: 0 0 1.15rem;
+  padding-left: 1.35em;
+  color: var(--fg-80);
+}
+
+.md li {
+  margin-bottom: 0.35rem;
+  line-height: 1.75;
+}
+
+.md li::marker {
+  color: var(--fg-40);
+}
+
+.md li > ul,
+.md li > ol {
+  margin: 0.35rem 0 0;
+}
+
+.md hr {
+  margin: 2.6rem 0;
+  border: 0;
+  border-top: 1px solid var(--fg-10);
+}
+
+.md blockquote {
+  margin: 2rem 0;
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--fg-10);
+  border-bottom: 1px solid var(--fg-10);
+  color: var(--fg-60);
+  font-family: var(--serif);
+  font-size: 1.06em;
+  font-style: italic;
+  line-height: 1.7;
+}
+
+.md blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.md code {
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 0.88em;
+}
+
+.md pre {
+  margin: 0 0 1.4rem;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  background: transparent;
+  overflow-x: auto;
+}
+
+.md pre code {
+  padding: 0;
+  background: transparent;
+  font-size: 0.84em;
+  line-height: 1.7;
+}
+
+.md table {
+  width: 100%;
+  margin: 0 0 1.4rem;
+  border-collapse: collapse;
+  font-size: 0.94em;
+}
+
+.md th,
+.md td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--fg-10);
+  text-align: left;
+}
+
+.md th {
+  color: var(--fg-40);
+  font-size: 0.72em;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.md img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--fg-10);
+}
+
+.md input[type="checkbox"] {
+  margin-right: 0.45em;
+  accent-color: var(--fg);
+}
+
+.md kbd {
+  padding: 0.1em 0.4em;
+  border: 1px solid var(--fg-20);
+  font-family: var(--mono);
+  font-size: 0.82em;
+}
+
+/* ---------------------------------------------------------------- 编辑 */
+
+/* ------------------------------------------------------------ 文件浮层 */
+
+.overlay {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  /* 同样没有底色，只有文字 */
+  background: transparent;
+}
+
+.overlay[hidden] {
+  display: none;
+}
+
+.overlay__head {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.overlay__head .input {
+  flex: 1 1 auto;
+}
+
+/* --------------------------------------------------------- 按钮悬停提示 */
+
+.tip {
+  position: absolute;
+  z-index: 20;
+  color: var(--fg-60);
+  font-family: var(--sans);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.tip[hidden] {
+  display: none;
+}
+
+/* --------------------------------------------------------- 空状态与滚动 */
+
+.empty {
+  padding: 44px 32px;
+  color: var(--fg-40);
+  font-family: var(--serif);
+  font-size: 13px;
+  font-style: italic;
+}
+
+.empty--side {
+  padding: 22px 12px;
+  font-size: 11px;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 滚动条压得很淡：以前那一大条浅色块太抢眼了 */
+::-webkit-scrollbar-thumb {
+  background: var(--fg-10);
+}
+
+.doc:hover::-webkit-scrollbar-thumb,
+.notes:hover::-webkit-scrollbar-thumb {
+  background: var(--fg-20);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fg-40);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::selection {
+  background: var(--tint-strong);
+}
+
+/* -------------------------------------------------- 滚动条让开缩放把手 */
+
+/* 窗口最外侧 4px 是缩放把手 .rz--e，而滚动条宽 5px、紧贴容器右边缘，
+   两者重叠时把手会吃掉鼠标事件（实测 5px 里只有 1px 能点到滚动条），
+   结果是滚动条完全拖不动。这里让带滚动条的容器整体向内让开 6px。 */
+.doc,
+.notes {
+  margin-right: 6px;
+}
+
+/* ------------------------------------------------------------ 缩放把手 */
+
+.rz {
+  position: absolute;
+  z-index: 5;
+  -webkit-app-region: no-drag;
+}
+
+.rz--n {
+  top: 0;
+  right: 6px;
+  left: 6px;
+  height: 4px;
+  cursor: ns-resize;
+}
+
+.rz--s {
+  right: 6px;
+  bottom: 0;
+  left: 6px;
+  height: 4px;
+  cursor: ns-resize;
+}
+
+.rz--w {
+  top: 6px;
+  bottom: 6px;
+  left: 0;
+  width: 4px;
+  cursor: ew-resize;
+}
+
+.rz--e {
+  top: 6px;
+  right: 0;
+  bottom: 6px;
+  width: 4px;
+  cursor: ew-resize;
+}
+
+.rz--nw,
+.rz--ne,
+.rz--sw,
+.rz--se {
+  width: 10px;
+  height: 10px;
+}
+
+.rz--nw {
+  top: 0;
+  left: 0;
+  cursor: nwse-resize;
+}
+
+.rz--ne {
+  top: 0;
+  right: 0;
+  cursor: nesw-resize;
+}
+
+.rz--sw {
+  bottom: 0;
+  left: 0;
+  cursor: nesw-resize;
+}
+
+.rz--se {
+  right: 0;
+  bottom: 0;
+  cursor: nwse-resize;
+}
+
+/* ------------------------------------------------------------ 降低动效 */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

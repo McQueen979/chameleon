@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-ink="0">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' file: data:; connect-src 'none'; form-action 'none'"
+    />
+    <title>Chameleon</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="frame">
+      <!-- 顶栏：只有符号，没有任何文字。显示哪些、什么顺序由 config.tools 决定：
+           files（≡）落在左侧拖动区，其余按钮按配置顺序排在右侧 -->
+      <header class="bar">
+        <div class="bar__drag">
+          <span class="bar__left" id="leftTools"></span>
+          <span class="meta" id="meta"></span>
+        </div>
+        <div class="bar__tools" id="rightTools"></div>
+      </header>
+
+      <!-- 正文：整个窗口都是它，没有任何底色，也不能编辑 -->
+      <main class="doc" id="doc">
+        <article class="md" id="article"></article>
+      </main>
+
+      <!-- 文件列表：打开时笔记完全消失，只剩这一条条文件名，同样没有底色 -->
+      <section class="overlay" id="overlay" hidden>
+        <div class="overlay__head">
+          <input
+            class="input"
+            id="filter"
+            type="text"
+            placeholder="筛选"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="筛选笔记"
+          />
+          <button class="btn btn--icon" id="btnCloseFiles" type="button" data-tip="关闭列表" aria-label="关闭列表">×</button>
+        </div>
+        <nav class="notes" id="notes"></nav>
+      </section>
+
+      <!-- 悬停在顶栏按钮上时出现的说明 -->
+      <div class="tip" id="tip" hidden></div>
+
+      <!-- 自绘窗口边缘：无边框窗口的缩放把手 -->
+      <div class="rz rz--n" data-dir="n"></div>
+      <div class="rz rz--s" data-dir="s"></div>
+      <div class="rz rz--w" data-dir="w"></div>
+      <div class="rz rz--e" data-dir="e"></div>
+      <div class="rz rz--nw" data-dir="nw"></div>
+      <div class="rz rz--ne" data-dir="ne"></div>
+      <div class="rz rz--sw" data-dir="sw"></div>
+      <div class="rz rz--se" data-dir="se"></div>
+    </div>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>

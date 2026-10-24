@@ -1,0 +1,357 @@
+/* ==========================================================================
+   Chameleon · 设置窗口（Editorial 编辑杂志风）
+   这是主窗口之外的独立普通窗口，有底色有边框，不影响主窗口的零底色与隐身逻辑。
+   禁止：彩色强调色 / 阴影 / 大圆角 / 渐变 / 粗边框 / 无衬线标题
+   ========================================================================== */
+
+:root {
+  --bg: #f9f8f6;
+  --fg: #1c1c1c;
+  --fg-80: rgba(28, 28, 28, 0.8);
+  --fg-60: rgba(28, 28, 28, 0.6);
+  --fg-40: rgba(28, 28, 28, 0.4);
+  --line: rgba(28, 28, 28, 0.1);
+
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Songti SC", "Source Han Serif SC",
+    "Noto Serif CJK SC", SimSun, serif;
+  --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Helvetica Neue", Arial, sans-serif;
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--sans);
+  font-size: 12px;
+  line-height: 1.6;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ------------------------------------------------------------------ 页头 */
+
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 15px 20px 11px;
+}
+
+.head__title {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.head__label {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg-40);
+}
+
+/* ------------------------------------------------------------------ 主体 */
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0 20px 14px;
+  overflow-y: auto;
+}
+
+.section {
+  padding: 11px 0 13px;
+  border-top: 1px solid var(--line);
+}
+
+.label {
+  margin: 0 0 9px;
+  font-family: var(--sans);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg-40);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.value {
+  flex: 0 0 auto;
+  min-width: 3.2em;
+  font-family: var(--serif);
+  font-size: 13px;
+  text-align: right;
+  color: var(--fg-80);
+}
+
+.range {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 16px;
+  margin: 0;
+  background: transparent;
+  accent-color: var(--fg);
+  cursor: pointer;
+}
+
+.range:focus-visible {
+  outline: none;
+}
+
+/* ------------------------------------------------------------ 顶栏按钮 */
+
+.tools {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tool {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 -6px;
+  padding: 5px 6px;
+  border-bottom: 1px solid var(--line);
+  touch-action: none;
+}
+
+.tool:last-of-type {
+  border-bottom: 0;
+}
+
+/* 可拖按钮：整行都能按住往下拖，不必去抓着那个柄 */
+.tool[data-drag="1"] {
+  cursor: grab;
+}
+
+.tool[data-drag="1"]:hover {
+  background: rgba(28, 28, 28, 0.035);
+}
+
+.tool.is-dragging {
+  background: rgba(28, 28, 28, 0.07);
+  cursor: grabbing;
+}
+
+.tool__check {
+  flex: 0 0 auto;
+  margin: 0;
+  accent-color: var(--fg);
+  cursor: pointer;
+}
+
+/* 固定行的勾选框占位，保证左边对齐 */
+.tool__pad {
+  flex: 0 0 auto;
+  width: 13px;
+}
+
+.tool__glyph {
+  flex: 0 0 auto;
+  width: 1.5em;
+  font-size: 11px;
+  text-align: center;
+  color: var(--fg-80);
+}
+
+.tool__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--fg-80);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tool__handle {
+  flex: 0 0 auto;
+  color: var(--fg-40);
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: -0.15em;
+  cursor: grab;
+}
+
+.tool__mark {
+  flex: 0 0 auto;
+  color: var(--fg-40);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+}
+
+/* 被隐藏的按钮排在后半段，整行压淡 */
+.tool.is-off .tool__glyph,
+.tool.is-off .tool__name {
+  color: var(--fg-40);
+}
+
+.tool.is-off .tool__glyph {
+  font-style: italic;
+}
+
+/* ------------------------------------------------------------------ 字色 */
+
+.ink {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.ink__item {
+  display: grid;
+  grid-template-columns: 54px 24px minmax(0, 1fr) 58px;
+  align-items: center;
+  gap: 9px;
+}
+
+.ink__chip {
+  width: 24px;
+  height: 18px;
+  border: 1px solid var(--line);
+}
+
+.ink__range {
+  width: 100%;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--fg);
+  cursor: pointer;
+}
+
+.ink__range:focus-visible {
+  outline: none;
+}
+
+.ink__label {
+  font-size: 10px;
+  color: var(--fg-80);
+}
+
+.ink__value {
+  font-family: var(--serif);
+  font-size: 10px;
+  text-align: right;
+  color: var(--fg-60);
+}
+
+/* -------------------------------------------------------------- 效果预览 */
+
+/* 两块小样：同一份字色 + 当前不透明度，分别叠在深底与浅底上。
+   窗口本身没有底色，所以只能这样近似「文字浮在什么背景上」的实际观感。 */
+.preview {
+  display: flex;
+  gap: 10px;
+  margin-top: 11px;
+}
+
+.pv {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 9px 11px;
+  color: color-mix(in srgb, var(--pv-ink, #f6f4f1) var(--pv-alpha, 100%), var(--pv-bg));
+}
+
+.pv--dark {
+  --pv-bg: #14151a;
+  background: #14151a;
+}
+
+.pv--light {
+  --pv-bg: #e9e7e2;
+  background: #e9e7e2;
+}
+
+.pv__title {
+  font-family: var(--serif);
+  font-size: 13px;
+  letter-spacing: -0.02em;
+}
+
+.pv__body {
+  font-family: var(--sans);
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+/* ------------------------------------------------------------------ 页脚 */
+
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  padding: 10px 20px 12px;
+  border-top: 1px solid var(--line);
+}
+
+.foot__gap {
+  flex: 1 1 auto;
+}
+
+.act {
+  padding: 5px 9px;
+  border: 0;
+  background: transparent;
+  color: var(--fg-60);
+  font-family: var(--sans);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s var(--ease);
+}
+
+.act:hover {
+  color: var(--fg);
+}
+
+.act:focus-visible {
+  outline: none;
+  color: var(--fg);
+}
+
+.act--strong {
+  color: var(--fg-80);
+  border-bottom: 1px solid var(--fg-40);
+}
+
+.act--strong:hover {
+  border-bottom-color: var(--fg);
+}
+
+/* ------------------------------------------------------------ 降低动效 */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

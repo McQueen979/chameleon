@@ -1,0 +1,51 @@
+{
+  "name": "chameleon",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chameleon - 办公室低存在感悬浮 Markdown 阅读器",
+  "license": "MIT",
+  "author": "Frieren <McQueen979@users.noreply.github.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/McQueen979/chameleon.git"
+  },
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "powershell -NoProfile -ExecutionPolicy Bypass -File build.ps1",
+    "portable": "electron-builder --win portable"
+  },
+  "build": {
+    "appId": "com.chameleon.reader",
+    "productName": "Chameleon",
+    "directories": {
+      "output": "dist-portable"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "portable": {
+      "artifactName": "Chameleon.exe"
+    },
+    "compression": "normal"
+  },
+  "dependencies": {
+    "markdown-it": "^14.1.0"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^26.15.3"
+  }
+}
