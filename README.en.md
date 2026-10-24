@@ -2,9 +2,7 @@
 
 # Chameleon
 
-**Read docs at work without anyone noticing another window.**
-
-A transparent, borderless Markdown reader for Windows · fades in after the pointer rests still (0.6 s by default) and vanishes the moment you move away
+Read docs at work without an extra window showing up on your screen.
 
 [![version](https://img.shields.io/badge/version-0.1.0-success)](../../releases)
 [![Electron](https://img.shields.io/badge/Electron-33-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
@@ -13,148 +11,131 @@ A transparent, borderless Markdown reader for Windows · fades in after the poin
 
 [简体中文](README.md) · [English](README.en.md)
 
+<img src="docs/封面截图.png" width="820" alt="Chameleon floating a Markdown note over a web page">
+
 </div>
 
-<!--
-  Image slot ① — hero screenshot: docs/hero.png (1600×1000, dark background, window revealed)
-  <img src="docs/hero.png" width="780" alt="Chameleon floating above a code editor">
--->
+The text floating on top of that page is the app. No frame, no background, no title bar — just glyphs.
 
-## Why "Chameleon"
+## What it is
 
-A chameleon changes color to blend into its surroundings so that nothing notices it.
+You often need to peek at something while working: an API doc, a command you keep forgetting, a note you just wrote. Opening a normal reader costs you a taskbar icon and a big slab of background, and anyone walking past can see it.
 
-Chameleon the app does the same thing: no frame, no background, no shadow, no taskbar entry — only text drawn directly on top of whatever is behind it. Look at it and it is there; move the pointer away and it disappears, restoring click-through so the app underneath keeps working. **On screen it looks exactly like nothing happened.**
+So this window draws nothing but text. It fades in only when you stop moving the mouse, and it is gone as soon as you move away. While it is gone, clicks go straight through to the app underneath.
 
-## Using it while you should be working
+That is where the name comes from: a chameleon does not change the room, it just blends into it.
 
-1. Put the Markdown files you want to read in a folder.
-2. Drag that folder (or a single `.md` file) **onto `Chameleon.exe`** — no need to launch it first.
-3. Rest the pointer in a corner → the document fades in → scroll a little → move away → the screen is instantly back to normal.
-4. Press `Alt + Shift + Q` to reveal or hide it globally, without hunting for the mouse.
+## When it appears
 
-Handy while a build runs, during a meeting, or whenever someone might walk past your desk.
+![Reveal on stillness, hide on leave](docs/显隐设置.gif)
 
-<!--
-  Image slot ② — demo GIFs: docs/demo-reveal.gif / demo-hide.gif / demo-ink.gif / demo-files.gif
-  Keep each under 2 MB, ~640 px wide. Delete the first and last line of this comment to enable.
-| Reveal on stillness | Hide on leave |
-| --- | --- |
-| <img src="docs/demo-reveal.gif" width="380" alt="Fades in after the mouse rests still"> | <img src="docs/demo-hide.gif" width="380" alt="Fades out and restores click-through"> |
+Moving the pointer around inside the window does nothing. Rest it and the document fades in, 0.6 s by default. Move away and it fades out.
 
-| Cycling the four ink levels | File list with `Ctrl + P` |
-| --- | --- |
-| <img src="docs/demo-ink.gif" width="380" alt="Cycling four grayscale ink levels"> | <img src="docs/demo-files.gif" width="380" alt="File list overlay"> |
--->
+Neither timing is hard-coded: the stillness threshold is adjustable in the settings window (250–2000 ms), and the fade duration lives in the config file, where 0 means an instant switch.
 
-## Why not just use another Markdown reader?
+## Readable on any background
 
-| | Typical reader | Chameleon |
-| --- | --- | --- |
-| Appearance | Title bar, background, shadow | Text only, borderless |
-| Visibility | Close or minimize manually | Appears on still pointer, hides on leave |
-| Footprint | Occupies taskbar, covers content | No taskbar entry; click-through when hidden |
-| Safety | Usually editable | Read-only by design |
-| Install | Installer | Unzip and run, USB-friendly |
+![Four grayscale ink levels](docs/四种颜色.gif)
 
-## ✨ Features
+White text for a dark wallpaper, black text for a light document. Drag the four gray values in the settings window and cycle through them with `+` in the top bar. All four are remembered.
 
-- **Zero-chrome overlay**: borderless, backgroundless, shadowless; adapts to any wallpaper or app underneath.
-- **Reveal on stillness**: fades in after the pointer rests inside the window — **0.6 s by default, adjustable from 250 to 2000 ms in the settings window**. Passing over or moving never reveals it.
-- **Hide on leave**: 180 ms fade-out by default (configurable), plus a 16 px hysteresis so edges do not flicker; click-through is restored immediately.
-- **Global hotkey** `Alt + Shift + Q`; after revealing, it stays visible for about 2 s (configurable), then resumes hiding.
-- **Four adjustable grayscale ink levels** (0–255 each), sorted light to dark and cycled with the `+` button; no outline, glow, or shadow on text.
-- **Adjustable opacity** from 0.15 to 1 while revealed.
-- **Stealth / pin toggles** in the top bar.
-- **Settings live in a separate window**, so the reading window never grows extra controls.
-- **Reading position memory**, saved before exit.
-- **File list** with `Ctrl + P`; the document is fully hidden while the list is open, filterable by file name.
-- **Drag & drop** a folder or a `.md` file onto the executable.
-- **Read-only**: there is no code path that writes to your notes.
-- **Portable**: one folder you can copy to a USB stick.
+## Daily use
 
-## 📥 Download
+1. Put the `.md` files you want in a folder
+2. Drag the folder onto `Chameleon.exe` — no need to launch the app first
+3. Rest the pointer in a corner, read a couple of lines, move away
+4. Someone walks over? `Alt + Shift + Q` hides it, no mouse needed
 
-Grab `Chameleon.zip` from [Releases](../../releases/latest), unzip anywhere, run `Chameleon.exe`.
+The window has no taskbar entry and no tray icon; quit with `×` at the far right of the top bar.
 
-- No installer, no admin rights.
-- The binary is unsigned; on first run SmartScreen may warn → "More info" → "Run anyway".
-- On first launch there are no notes: drag a folder or a single `.md` file **onto `Chameleon.exe`**.
-
-| Requirement | Value |
-| --- | --- |
-| OS | Windows 10 / 11 (x64) |
-| Runtime | None — Electron is bundled |
-| Unzipped size | ~270 MB |
-
-## ⌨️ Shortcuts
+## Shortcuts
 
 | Action | Result |
 | --- | --- |
-| Pointer still inside the window (0.6 s by default) | Fade in; scroll and select text |
-| Pointer passing over, or still moving | Stays invisible |
-| Pointer leaves the window | Fade out, click-through restored |
+| Pointer rests inside the window (0.6 s by default) | Fades in; scroll and select text |
+| Pointer passes over or keeps moving | Stays hidden |
+| Pointer leaves the window | Fades out, click-through restored |
 | `Alt + Shift + Q` | Reveal / hide |
 | `Ctrl + P` | Toggle file list |
-| `Esc` | Close list, otherwise hide window |
+| `Esc` | Close the list, otherwise hide the window |
 | `Ctrl + +` / `Ctrl + -` / `Ctrl + 0` | Zoom in / out / reset |
 
-## ⚙️ Settings
+The window is borderless; drag any edge or corner to resize, down to 120 × 80.
 
-Settings open in a separate window: `Chameleon.exe --settings`, or the "Chameleon Settings" desktop shortcut created by the build script.
+## Settings
 
-| Setting | Description | Range |
+Settings live in their own window, so the reading window never grows extra buttons. Open it from the "Chameleon Settings" desktop shortcut, or run `Chameleon.exe --settings`.
+
+| Item | Meaning | Range |
 | --- | --- | --- |
-| Opacity | Window opacity while revealed | 0.15 – 1 |
-| Stillness threshold | How long the pointer must rest | 250 – 2000 ms (default 600) |
-| Top-bar buttons | Show/hide and drag to reorder | — |
-| Ink levels | Four grayscale values (0 black – 255 white) | — |
+| Opacity | How see-through the window is while revealed | 0.15 – 1 |
+| Stillness threshold | How long the pointer must rest | 250 – 2000 ms, default 600 |
+| Top-bar buttons | Tick to show, drag rows to reorder | — |
+| Ink levels | Four gray values, sorted light to dark | 0 black – 255 white |
 
-The file list button `≡` is pinned left and `×` (quit) is pinned right; both are always visible. Unchecking a middle button only hides it — its row keeps its position.
+The file list button `≡` is pinned left and quit `×` is pinned right; neither can be hidden. The four in between can be unticked or dragged. Unticking hides a button but keeps its row in place.
 
-## 🎨 Configuration
+## Config file
 
-`%APPDATA%\chameleon\config.json`, written atomically (temp file + rename) and watched at runtime, so manual edits apply immediately. Every value is validated on write.
+`%APPDATA%\chameleon\config.json`. Edits take effect as soon as you save — no restart — and every value is clamped back into a sane range, so a typo cannot make the window disappear for good.
 
-Keys: `notesDir`, `hotkey`, `ink`, `inkTones`, `hoverOpacity`, `tools`, `toolsOff`, `lastNote`, `scroll`, `zoom`, `stillMs` (default 600), `fadeMs` (default 180, 0 = instant), `revealMs` (default 2000).
+The keys you are likely to touch: `notesDir`, `hotkey`, `hoverOpacity`, `inkTones`, `stillMs`, `fadeMs`, `revealMs`. Button order and visibility are stored separately in `tools` and `toolsOff`, which is why unticking something in the settings window leaves its row where it was.
 
-## 🛠 Build from source
+## Build from source
 
-Windows + Node.js 20.
+Windows and Node.js 20.
 
 ```powershell
 git clone https://github.com/McQueen979/chameleon.git
 cd chameleon
 
-$env:ELECTRON_MIRROR='https://npmmirror.com/mirrors/electron/'   # only behind the GFW
+# Electron binaries are fetched from GitHub, which is unreliable in some networks
+$env:ELECTRON_MIRROR='https://npmmirror.com/mirrors/electron/'
 npm install
 
-npm start
-npm run build      # portable folder in dist\Chameleon\
+npm start          # normal run
+npm run dev        # devtools open, runtime log printed
+npm run build      # portable build
 ```
 
-The build is fully offline: it assembles the Electron runtime already present in `node_modules` instead of fetching electron-builder or NSIS.
+`npm run build` works offline: it assembles the Electron runtime already sitting in `node_modules` into a portable folder at `dist\Chameleon`, and drops two shortcuts on the desktop. No electron-builder, no NSIS download.
 
-## 🧩 Markdown support
+## Layout
 
-Standard syntax: headings, lists, blockquotes, fenced code, tables, rules. Relative links between notes open inside the window, `http(s)` links go to the system browser. Raw HTML is shown as text; bare URLs are not auto-linked; `- [ ]` renders as plain text. Images are not fetched (the window blocks all external resource requests); text is unaffected. Rendering degrades gracefully, so a single problematic construct never blanks the whole document.
+```
+chameleon/
+├─ src/
+│  ├─ main/       window, hover reveal, click-through, config, Markdown rendering
+│  ├─ preload/    contextBridge allow-list
+│  └─ renderer/   reading view and settings window
+├─ docs/          screenshots and demo GIFs
+├─ build.ps1      portable build script
+├─ CHANGELOG.md
+└─ package.json
+```
 
-## ⚠️ Known limitations
+## Markdown
 
-- Windows only; strictly read-only, no editing.
-- `.md` and `.markdown` files only.
-- The file list scans on open (no live watch), filters by file name only, and has no full-text search.
-- The notes folder is changed via the config file; there is no in-app switcher.
-- Ink level must be picked manually for the background behind the window.
-- Scroll positions are stored in pixels, so changing zoom may shift the restored position.
+Headings, lists, blockquotes, fenced code, tables and rules all render normally. Relative links between notes open inside the window; `http(s)` links go to the system browser.
 
-## 🗺️ Roadmap
+Raw HTML shows up as text, bare URLs are not auto-linked, and `- [ ]` stays plain text. Images are not loaded because the window blocks every external resource request; the text is unaffected.
 
-- [x] v0.1.0 — transparent overlay, hover reveal, read-only browsing, portable build
-- [ ] Single-file exe and code signing
-- [ ] Optional in-note image rendering
-- [ ] Full-text search and multiple collections
+There used to be a nasty bug: a single link anywhere in a note made the whole document fail to render. Rendering now degrades in stages, so the worst case is plain text for that one note.
 
-## 📄 License
+## Limitations
 
-[MIT](LICENSE)
+- Windows only, strictly read-only, no editing
+- `.md` and `.markdown` only
+- The file list scans on open instead of watching the folder, filters by file name, and has no full-text search
+- Changing the notes folder means editing the config file; there is no in-app switcher
+- You pick the ink level yourself; it does not sample the background
+- Scroll positions are stored in pixels, so changing zoom can shift the restored position
+- If another app owns the hotkey, double-click the executable to bring the window back
+
+## Version
+
+Semantic versioning; every change is listed in [CHANGELOG.md](CHANGELOG.md), downloads are on [Releases](../../releases).
+
+## License
+
+MIT.
