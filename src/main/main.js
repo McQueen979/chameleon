@@ -9,8 +9,8 @@
  * 2. 鼠标在窗口范围内「完全静止」够久（默认 1 秒）才淡入显现；只是路过一律不显示。
  * 3. 鼠标移出 → 淡出到 0 并恢复点击穿透，鼠标可以正常操作下层窗口。
  *
- * 设置全部放在主界面之外：`Chameleon.exe --settings` 开一个普通窗口（桌面上的
- * 「设置」快捷方式），或者直接手改 config.json（会被监听并立即生效）。
+ * 设置全部放在主界面之外：双击 `Chameleon Settings.exe` 开一个普通窗口，
+ * 也可以 `Chameleon.exe --settings`，或者直接手改 config.json（会被监听并立即生效）。
  * 主窗口的界面因此一个按钮都不用增加。
  */
 
@@ -61,6 +61,21 @@ const runtime = {
   watchTimer: null,
 };
 
+/**
+ * 是否要开设置窗口。两种入口等效：
+ * - `Chameleon Settings.exe`（构建时复制出来的一份，双击就能进设置）
+ * - `Chameleon.exe --settings`
+ */
+const SETTINGS_EXE = 'chameleon settings';
+
+function wantsSettings(argv) {
+  const list = Array.isArray(argv) ? argv : [];
+  if (list.includes('--settings')) return true;
+  const exe = list.find((arg) => typeof arg === 'string' && /\.exe$/i.test(arg));
+  if (!exe) return false;
+  return path.basename(exe, path.extname(exe)).toLowerCase() === SETTINGS_EXE;
+}
+
 const gotLock = app.requestSingleInstanceLock();
 
 if (!gotLock) {
@@ -69,8 +84,8 @@ if (!gotLock) {
   app.quit();
 } else {
   app.on('second-instance', (_event, argv) => {
-    // 程序已经在跑时双击「设置」快捷方式：交给本实例开设置窗口，不能把这一下丢掉
-    if ((argv || []).includes('--settings')) {
+    // 程序已经在跑时双击「设置」：交给本实例开设置窗口，不能把这一下丢掉
+    if (wantsSettings(argv)) {
       openSettings();
       return;
     }
@@ -269,7 +284,7 @@ function openExternal(url) {
 
 /**
  * 设置放在主界面之外：普通窗口，有边框有底色，和主窗口的透明 / 穿透 / 隐身完全隔离。
- * 入口是 `--settings`（桌面上的设置快捷方式），主窗口不增加任何按钮。
+ * 入口是 `Chameleon Settings.exe` 或 `--settings`，主窗口不增加任何按钮。
  */
 function openSettings() {
   if (settingsWin && !settingsWin.isDestroyed()) {
@@ -279,11 +294,15 @@ function openSettings() {
     return settingsWin;
   }
 
+  // 高度按屏幕可用空间给，别在小屏上超出可视区；「关于」尽量一屏放得下
+  const workArea = screen.getPrimaryDisplay().workAreaSize;
+  const settingsHeight = Math.max(540, Math.min(780, workArea.height - 120));
+
   settingsWin = new BrowserWindow({
     width: 400,
-    height: 540,
+    height: settingsHeight,
     minWidth: 340,
-    minHeight: 400,
+    minHeight: 420,
     title: 'Chameleon 设置',
     backgroundColor: '#f9f8f6',
     autoHideMenuBar: true,
@@ -607,8 +626,8 @@ app.whenReady().then(() => {
   registerHotkey();
   watchConfig();
 
-  // 用 --settings 冷启动：主窗口照常建出来（改设置时能直接看到效果），设置窗口一起开
-  if (process.argv.includes('--settings')) openSettings();
+  // 用设置版 exe 或 --settings 冷启动：主窗口照常建出来（改设置时能直接看到效果），设置窗口一起开
+  if (wantsSettings(process.argv)) openSettings();
 
   app.on('activate', () => showWindow({ focus: true, reveal: true }));
 });
@@ -634,6 +653,7 @@ ipcMain.handle('app:bootstrap', async () => {
     open: runtime.pendingOpen,
     stealth: runtime.stealth,
     pinned: runtime.pinned,
+    version: app.getVersion(),
     minSize: { width: MIN_WIDTH, height: MIN_HEIGHT },
   };
 });
@@ -657,6 +677,15 @@ ipcMain.handle('app:showConfig', () => {
   if (fs.existsSync(cfg.file)) shell.showItemInFolder(cfg.file);
   else shell.openPath(path.dirname(cfg.file));
   return cfg.file;
+});
+
+/** 设置窗口里的链接：只放行本项目自己的地址，别的一律不认 */
+const EXTERNAL_SAFE = /^https:\/\/github\.com\/McQueen979\/chameleon(\/|$)/i;
+
+ipcMain.handle('app:openExternal', (_event, url) => {
+  if (typeof url !== 'string' || !EXTERNAL_SAFE.test(url)) return false;
+  shell.openExternal(url);
+  return true;
 });
 
 ipcMain.handle('app:setStealth', (_event, stealth) => {

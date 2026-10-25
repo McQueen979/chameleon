@@ -39,6 +39,17 @@ Neither timing is hard-coded: the stillness threshold is adjustable in the setti
 
 White text for a dark wallpaper, black text for a light document. Drag the four gray values in the settings window and cycle through them with `+` in the top bar. All four are remembered.
 
+## Download
+
+Grab `Chameleon.zip` from [Releases](../../releases/latest), unzip anywhere, and run it — no installation.
+
+The folder contains two executables:
+
+- `Chameleon.exe` — the reading window. Drag a folder or a single `.md` file onto it to open
+- `Chameleon Settings.exe` — the settings window. Double-click, no arguments needed
+
+Windows 10 / 11 (64-bit). The binaries are unsigned, so Windows may warn on first run: "More info" → "Run anyway".
+
 ## Daily use
 
 1. Put the `.md` files you want in a folder
@@ -64,7 +75,9 @@ The window is borderless; drag any edge or corner to resize, down to 120 × 80.
 
 ## Settings
 
-Settings live in their own window, so the reading window never grows extra buttons. Open it from the "Chameleon Settings" desktop shortcut, or run `Chameleon.exe --settings`.
+Settings live in their own window, so the reading window never grows extra buttons. Double-click `Chameleon Settings.exe` in the unzipped folder (the desktop shortcut points at it), or run `Chameleon.exe --settings`.
+
+At the bottom there is an About block listing the version and author; the repository link and "report an issue" open GitHub in your browser.
 
 | Item | Meaning | Range |
 | --- | --- | --- |

@@ -10,7 +10,8 @@
 # instead. Fully offline, and the result can be copied to a USB stick.
 #
 # Usage:  npm run build   (or)   powershell -ExecutionPolicy Bypass -File build.ps1
-# Output: dist\Chameleon\Chameleon.exe plus a desktop shortcut
+# Output: dist\Chameleon\Chameleon.exe (reader), Chameleon Settings.exe (settings)
+#         plus desktop shortcuts for both
 
 $ErrorActionPreference = 'Stop'
 
@@ -30,6 +31,52 @@ New-Item -ItemType Directory -Path $out -Force | Out-Null
 Write-Host 'Copying Electron runtime...'
 Copy-Item -Path (Join-Path $electronDist '*') -Destination $out -Recurse -Force
 Rename-Item -LiteralPath (Join-Path $out 'electron.exe') -NewName 'Chameleon.exe'
+
+# Second executable, same byte-for-byte binary: the app reads its own file name and
+# opens the settings window instead of the reader. Double-clicking it just works,
+# no shortcut arguments and no property editing needed.
+Write-Host 'Creating settings executable...'
+# The settings entry point is a tiny launcher (~4 KB) rather than a second copy of the
+# 180 MB Electron binary: it just starts Chameleon.exe with --settings. Falls back to a
+# plain copy if no C# compiler is available (the app also detects its own file name).
+$settingsExe = Join-Path $out 'Chameleon Settings.exe'
+$csc = @(
+    (Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'),
+    (Join-Path $env:WINDIR 'Microsoft.NET\Framework\v4.0.30319\csc.exe')
+) | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+if ($csc) {
+    $src = Join-Path $env:TEMP 'chameleon-settings-launcher.cs'
+    $code = @'
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+
+class ChameleonSettings
+{
+    [STAThread]
+    static void Main()
+    {
+        string dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        string exe = Path.Combine(dir, "Chameleon.exe");
+        if (!File.Exists(exe)) exe = Path.Combine(dir, "Chameleon Settings.exe");
+        if (!File.Exists(exe)) return;
+        Process.Start(new ProcessStartInfo(exe, "--settings") { UseShellExecute = true });
+    }
+}
+'@
+    Set-Content -LiteralPath $src -Value $code -Encoding ASCII
+    & $csc /nologo /target:winexe /optimize+ /out:$settingsExe $src | Out-Null
+    Remove-Item -LiteralPath $src -Force -ErrorAction SilentlyContinue
+    if (-not (Test-Path $settingsExe)) {
+        Write-Warning 'Launcher build failed, falling back to a copy of Chameleon.exe.'
+        Copy-Item -LiteralPath (Join-Path $out 'Chameleon.exe') -Destination $settingsExe -Force
+    }
+} else {
+    Write-Warning 'No C# compiler found, settings entry will be a copy of Chameleon.exe.'
+    Copy-Item -LiteralPath (Join-Path $out 'Chameleon.exe') -Destination $settingsExe -Force
+}
 
 Write-Host 'Installing application code...'
 New-Item -ItemType Directory -Path $appDir -Force | Out-Null
@@ -62,13 +109,14 @@ $shortcut.IconLocation = "$env:SystemRoot\System32\imageres.dll,-102"
 $shortcut.Description = ''
 $shortcut.Save()
 
-# Second shortcut: opens the settings window, which is an ordinary window separate
-# from the zero-chrome reader (this script must stay ASCII-only, hence the English name).
+# Second shortcut: opens the settings window, which is a separate ordinary window
+# from the zero-chrome reader. It targets the dedicated settings executable, so a
+# plain double-click works without passing any arguments.
 Write-Host 'Creating settings shortcut...'
 $lnkSettings = Join-Path $desktop 'Chameleon Settings.lnk'
 $settings = $shell.CreateShortcut($lnkSettings)
-$settings.TargetPath = Join-Path $out 'Chameleon.exe'
-$settings.Arguments = '--settings'
+$settings.TargetPath = Join-Path $out 'Chameleon Settings.exe'
+$settings.Arguments = ''
 $settings.WorkingDirectory = $out
 $settings.IconLocation = "$env:SystemRoot\System32\imageres.dll,-70"
 $settings.Description = ''

@@ -30,6 +30,8 @@ const DRAGGABLE = TOOL_META.map((tool) => tool.id).filter(
 
 const DEFAULT_INK_TONES = [244, 198, 86, 21];
 
+const REPO_URL = 'https://github.com/McQueen979/chameleon';
+
 /** 「恢复默认」只改这五个键，其它键（笔记目录、阅读位置…）一个字都不动 */
 const RESET_PATCH = {
   hoverOpacity: 1,
@@ -51,6 +53,9 @@ const el = {
   btnConfig: $('btnConfig'),
   btnReset: $('btnReset'),
   btnClose: $('btnClose'),
+  aboutVersion: $('aboutVersion'),
+  linkRepo: $('linkRepo'),
+  linkIssues: $('linkIssues'),
 };
 
 const state = {
@@ -332,11 +337,16 @@ el.btnReset.addEventListener('click', () => {
 el.btnConfig.addEventListener('click', () => api.showConfig());
 el.btnClose.addEventListener('click', () => window.close());
 
+// 关于：仓库与反馈都跳系统浏览器，不在窗口内导航
+el.linkRepo.addEventListener('click', () => api.openExternal(REPO_URL));
+el.linkIssues.addEventListener('click', () => api.openExternal(`${REPO_URL}/issues`));
+
 /* ---------------------------------------------------------------- 启动 */
 
 async function boot() {
   const data = await api.bootstrap();
   state.config = data.config;
+  el.aboutVersion.textContent = data.version ? `v${data.version}` : '—';
   render();
   // 外部改了配置（手改 JSON / 别的窗口）也同步过来；
   // 自己刚写完的那一下以 setConfig 返回值为准，避免和输入框抢

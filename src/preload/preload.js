@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('chameleon', {
   readNote: (rel) => ipcRenderer.invoke('notes:read', rel),
   setConfig: (patch) => ipcRenderer.invoke('config:set', patch),
   showConfig: () => ipcRenderer.invoke('app:showConfig'),
+  openExternal: (url) => ipcRenderer.invoke('app:openExternal', url),
   setStealth: (stealth) => ipcRenderer.invoke('app:setStealth', stealth),
   setPinned: (pinned) => ipcRenderer.invoke('app:setPinned', pinned),
   getBounds: () => ipcRenderer.invoke('window:getBounds'),
